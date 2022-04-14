@@ -14,7 +14,7 @@ warnings.filterwarnings("ignore")
 sitemap = "https://imarabinda.in/sitemap_index.xml"
 
 # JSON api key file path
-JSON_KEY_FILE = "site-indexing-346915-751cc143f2a9.json"
+JSON_KEY_FILE = "site-indexing-346915-88d2e7c5b264.json"
 
 SLEEP = 1.0  # Time in seconds the script should wait between requests
 
@@ -23,7 +23,7 @@ TASK_NAME = "indexing"
 REQUEST_TYPE = "URL_UPDATED"
 
 # result file name (beta working)
-RESULT_FILE_NAME = "{TASK_NAME}_result.csv"
+RESULT_FILE_NAME = "indexing_result.csv"
 
 SCOPES = [ "https://www.googleapis.com/auth/indexing" ]
 ENDPOINT = "https://indexing.googleapis.com/v3/urlNotifications:publish"
@@ -63,8 +63,9 @@ def insert_event(request_id, response, exception):
 
 def store_in_csv(request_id,response):
     for key,value in response.items():
-        url_statuscodes.append(
-            request_id,[value['url'], value['latestUpdate']['type'], value['latestUpdate']['notifyTime']])
+        url_statuscodes.append([request_id, value['url'], value['latestUpdate']
+                                ['type'], value['latestUpdate']['notifyTime']]
+            )
 
 def sendIndexRequest(urls):
     # Authorize credentials
