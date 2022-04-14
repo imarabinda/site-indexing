@@ -22,6 +22,10 @@ SLEEP = 1.0  # Time in seconds the script should wait between requests
 TASK_NAME = "indexing"
 REQUEST_TYPE = "URL_UPDATED"
 
+OVERWRITE_URLS = {
+    
+}
+
 # result file name (beta working)
 RESULT_FILE_NAME = "indexing_result.csv"
 
@@ -42,6 +46,8 @@ def setup_log(name):
     return logger
 
 logger = setup_log(TASK_NAME)
+
+
 
 url_statuscodes = []
 def get_sitemap_urls(site):
@@ -78,8 +84,11 @@ def sendIndexRequest(urls):
     batch = service.new_batch_http_request(callback=insert_event)
     logger.info("Creating batch request....")
     for url in urls:
+        request_type = REQUEST_TYPE
+        if url in OVERWRITE_URLS:
+            request_type = OVERWRITE_URLS[url]
         batch.add(service.urlNotifications().publish(
-            body={"url": url, "type": REQUEST_TYPE}))
+            body={"url": url, "type": request_type}))
     logger.info("Batch request created....")
     logger.info("Batch request executing...")
     batch.execute()
