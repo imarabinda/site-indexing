@@ -14,24 +14,29 @@ warnings.filterwarnings("ignore")
 sitemap = "https://imarabinda.in/sitemap_index.xml"
 
 # JSON api key file path
-JSON_KEY_FILE = "site-indexing-346915-88d2e7c5b264.json"
+JSON_KEY_FILE = "site-indexing-346915-88d2e7c5b264.json" 
 
-SLEEP = 1.0  # Time in seconds the script should wait between requests
+# Time in seconds the script should wait between requests.
+SLEEP = 1.0
 
-
+# task name (optional), don't leave blank
 TASK_NAME = "indexing"
+
+# default request type for all urls.
 REQUEST_TYPE = "URL_UPDATED"
 
+# add specific url to overwrite default request type.
 OVERWRITE_URLS = {
-    
-}
+    # i.e 'url':'request type'
+} 
 
-# result file name (beta working)
+# result file name
 RESULT_FILE_NAME = "indexing_result.csv"
 
+
+#Don't change anything after this. If you don't know what you're doing.
 SCOPES = [ "https://www.googleapis.com/auth/indexing" ]
 ENDPOINT = "https://indexing.googleapis.com/v3/urlNotifications:publish"
-
 
 # logging config
 def setup_log(name):
@@ -46,8 +51,6 @@ def setup_log(name):
     return logger
 
 logger = setup_log(TASK_NAME)
-
-
 
 url_statuscodes = []
 def get_sitemap_urls(site):
