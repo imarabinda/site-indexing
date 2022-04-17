@@ -19,9 +19,6 @@ csv_path = ""
 # JSON api key file path
 JSON_KEY_FILE = "site-indexing-346915-88d2e7c5b264.json" 
 
-# Time in seconds the script should wait between requests.
-SLEEP = 1.0
-
 # task name (optional), don't leave blank
 TASK_NAME = "indexing"
 
@@ -75,7 +72,6 @@ def get_from_sitemap(site):
         sitemap = sitemap.dropna(subset=["loc"]).reset_index(drop=True)
         url_list = list(sitemap['loc'].unique())
         logger.info("All Sitemap urls listed....")
-        time.sleep(SLEEP)
         URLs = URLs + url_list
 
 def get_from_csv(csv_path):
