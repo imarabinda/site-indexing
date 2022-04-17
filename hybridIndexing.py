@@ -11,7 +11,10 @@ import time
 warnings.filterwarnings("ignore")
 
 # Enter your XML Sitemap
-sitemap = "https://imarabinda.in/sitemap_index.xml"
+sitemap = ""
+
+# Enter your csv file path, csv file must contain url and request_type column
+csv_path = ""
 
 # JSON api key file path
 JSON_KEY_FILE = "site-indexing-346915-88d2e7c5b264.json" 
@@ -41,6 +44,7 @@ OVERWRITE_URLS = {
 # result file name
 RESULT_FILE_NAME = "indexing_result.csv"
 
+
 #Don't change anything after this. If you don't know what you're doing.
 SCOPES = [ "https://www.googleapis.com/auth/indexing" ]
 ENDPOINT = "https://indexing.googleapis.com/v3/urlNotifications:publish"
@@ -61,9 +65,10 @@ logger = setup_log(TASK_NAME)
 
 url_statuscodes = []
 
-def get_sitemap_urls(site):
+
+def get_from_sitemap(site):
     global URLs
-    if site != '':
+    if site:
         #get all urls from sitemap
         logger.info("Getting sitemap urls from `%s`....",site)
         sitemap = adv.sitemap_to_df(site)
@@ -73,13 +78,27 @@ def get_sitemap_urls(site):
         time.sleep(SLEEP)
         URLs = URLs + url_list
 
+def get_from_csv(csv_path):
+    if csv_path: 
+        global OVERWRITE_URLS
+        csv = pd.read_csv(csv_path)
+        for index, row in csv.iterrows():
+            URLs.append(row['url'])
+            if 'request_type' in row and row['request_type'] != REQUEST_TYPE:
+                OVERWRITE_URLS[row['url']] = row['request_type']
+        
+
 def filter_and_send():
     logger.info("Excluding URLs if available....")
     for index, url in enumerate(URLs):
         if url in EXCLUDE_URLS:
             URLs.pop(index)
             logger.info("url `%s` removed ....",url)
-    sendIndexRequest(URLs)
+    urls = pd.Series(URLs, name='A').unique()
+    if urls:
+        sendIndexRequest(urls)
+    else:
+        logger.info("url list is empty...")
 
 def insert_event(request_id, response, exception):
     if exception is not None:
@@ -91,8 +110,7 @@ def insert_event(request_id, response, exception):
 def store_in_csv(request_id,response):
     for key,value in response.items():
         url_statuscodes.append([request_id, value['url'], value['latestUpdate']
-                                ['type'], value['latestUpdate']['notifyTime']]
-            )
+                                ['type'], value['latestUpdate']['notifyTime']])
 
 def sendIndexRequest(urls):
     # Authorize credentials
@@ -122,12 +140,13 @@ def sendIndexRequest(urls):
             url_statuscodes, columns=['Request ID',"URL", "Type", "Notify Time"])
         url_statuscodes_df.to_csv(RESULT_FILE_NAME, index=False)
         logger.info("Result csv file saved...")
-    logger.info("The END...")
 
 
 def main_engine():
     logger.info('Starting...')
-    get_sitemap_urls(sitemap)
+    get_from_sitemap(sitemap)
+    get_from_csv(csv_path)
     filter_and_send()
+    logger.info("The END...")
 
 main_engine()
