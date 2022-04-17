@@ -11,7 +11,7 @@ import time
 warnings.filterwarnings("ignore")
 
 # Enter your XML Sitemap
-sitemap_url = ""
+sitemap_url = "https://imarabinda.in/sitemap_index.xml"
 
 # Enter your csv file path, csv file must contain url and request_type column
 csv_path = ""
@@ -27,7 +27,6 @@ REQUEST_TYPE = "URL_UPDATED"
 
 # specific urls
 URLs = [
-    'https://imarabinda.in/contact',
 ]
 
 # add specific url to remove from request.
@@ -93,7 +92,7 @@ def filter_and_send():
             URLs.pop(index)
             logger.info("url `%s` removed ....",url)
     urls = pd.Series(URLs, name='A').unique()
-    if urls:
+    if len(urls) > 0:
         sendIndexRequest(urls)
     else:
         logger.info("url list is empty...")
