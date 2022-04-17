@@ -10,6 +10,7 @@ It is mandatory to get your google service account api key file and add it's pat
 `REQUEST_TYPE` enter default request type. By default it is `URL_UPDATED`.
 
 `sitemap_url` enter your sitemap url. If empty getting urls from sitemap will be skipped.
+
 `csv_path` enter your csv file path. If empty getting urls from csv file will be skipped.
 
 >csv file must contain url column, request_type column is optional, add it if you need to overwrite default `REQUEST_TYPE` param.
