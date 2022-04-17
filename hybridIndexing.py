@@ -39,7 +39,7 @@ EXCLUDE_URLS =[]
 # add specific url to overwrite default request type.
 OVERWRITE_URLS = {
     # i.e 'url':'request type'
-} 
+}
 
 # result file name
 RESULT_FILE_NAME = "indexing_result.csv"
@@ -89,6 +89,8 @@ def get_from_csv(csv_path):
         
 
 def filter_and_send():
+    global EXCLUDE_URLS
+    EXCLUDE_URLS = pd.Series(EXCLUDE_URLS,name ='A').unique()
     logger.info("Excluding URLs if available....")
     for index, url in enumerate(URLs):
         if url in EXCLUDE_URLS:
