@@ -25,6 +25,14 @@ TASK_NAME = "indexing"
 # default request type for all urls.
 REQUEST_TYPE = "URL_UPDATED"
 
+# specific urls
+URLs = [
+    'https://imarabinda.in/contact',
+]
+
+# add specific url to remove from request.
+EXCLUDE_URLS =[]
+
 # add specific url to overwrite default request type.
 OVERWRITE_URLS = {
     # i.e 'url':'request type'
@@ -32,7 +40,6 @@ OVERWRITE_URLS = {
 
 # result file name
 RESULT_FILE_NAME = "indexing_result.csv"
-
 
 #Don't change anything after this. If you don't know what you're doing.
 SCOPES = [ "https://www.googleapis.com/auth/indexing" ]
@@ -53,15 +60,26 @@ def setup_log(name):
 logger = setup_log(TASK_NAME)
 
 url_statuscodes = []
+
 def get_sitemap_urls(site):
-    #get all urls from sitemap
-    logger.info("Getting sitemap urls....")
-    sitemap = adv.sitemap_to_df(site)
-    sitemap = sitemap.dropna(subset=["loc"]).reset_index(drop=True)
-    url_list = list(sitemap['loc'].unique())
-    logger.info("All Sitemap urls listed....")
-    time.sleep(SLEEP)
-    sendIndexRequest(url_list)
+    global URLs
+    if site != '':
+        #get all urls from sitemap
+        logger.info("Getting sitemap urls from `%s`....",site)
+        sitemap = adv.sitemap_to_df(site)
+        sitemap = sitemap.dropna(subset=["loc"]).reset_index(drop=True)
+        url_list = list(sitemap['loc'].unique())
+        logger.info("All Sitemap urls listed....")
+        time.sleep(SLEEP)
+        URLs = URLs + url_list
+
+def filter_and_send():
+    logger.info("Excluding URLs if available....")
+    for index, url in enumerate(URLs):
+        if url in EXCLUDE_URLS:
+            URLs.pop(index)
+            logger.info("url `%s` removed ....",url)
+    sendIndexRequest(URLs)
 
 def insert_event(request_id, response, exception):
     if exception is not None:
@@ -92,6 +110,7 @@ def sendIndexRequest(urls):
             request_type = OVERWRITE_URLS[url]
         batch.add(service.urlNotifications().publish(
             body={"url": url, "type": request_type}))
+        logger.info("Adding `%s` url request type `%s`....", url, request_type)
     logger.info("Batch request created....")
     logger.info("Batch request executing...")
     batch.execute()
@@ -105,4 +124,10 @@ def sendIndexRequest(urls):
         logger.info("Result csv file saved...")
     logger.info("The END...")
 
-get_sitemap_urls(sitemap)
+
+def main_engine():
+    logger.info('Starting...')
+    get_sitemap_urls(sitemap)
+    filter_and_send()
+
+main_engine()
