@@ -11,7 +11,7 @@ import time
 warnings.filterwarnings("ignore")
 
 # Enter your XML Sitemap
-sitemap = ""
+sitemap_url = ""
 
 # Enter your csv file path, csv file must contain url and request_type column
 csv_path = ""
@@ -34,10 +34,10 @@ URLs = [
 ]
 
 # add specific url to remove from request.
-EXCLUDE_URLS =[]
+EXCLUDE_URLs =[]
 
 # add specific url to overwrite default request type.
-OVERWRITE_URLS = {
+OVERWRITE_URLs = {
     # i.e 'url':'request type'
 }
 
@@ -80,20 +80,20 @@ def get_from_sitemap(site):
 
 def get_from_csv(csv_path):
     if csv_path: 
-        global OVERWRITE_URLS
+        global OVERWRITE_URLs
         csv = pd.read_csv(csv_path)
         for index, row in csv.iterrows():
             URLs.append(row['url'])
             if 'request_type' in row and row['request_type'] != REQUEST_TYPE:
-                OVERWRITE_URLS[row['url']] = row['request_type']
+                OVERWRITE_URLs[row['url']] = row['request_type']
         
 
 def filter_and_send():
-    global EXCLUDE_URLS
-    EXCLUDE_URLS = pd.Series(EXCLUDE_URLS,name ='A').unique()
+    global EXCLUDE_URLs
+    EXCLUDE_URLs = pd.Series(EXCLUDE_URLs,name ='A').unique()
     logger.info("Excluding URLs if available....")
     for index, url in enumerate(URLs):
-        if url in EXCLUDE_URLS:
+        if url in EXCLUDE_URLs:
             URLs.pop(index)
             logger.info("url `%s` removed ....",url)
     urls = pd.Series(URLs, name='A').unique()
@@ -126,8 +126,8 @@ def sendIndexRequest(urls):
     logger.info("Creating batch request....")
     for url in urls:
         request_type = REQUEST_TYPE
-        if url in OVERWRITE_URLS:
-            request_type = OVERWRITE_URLS[url]
+        if url in OVERWRITE_URLs:
+            request_type = OVERWRITE_URLs[url]
         batch.add(service.urlNotifications().publish(
             body={"url": url, "type": request_type}))
         logger.info("Adding `%s` url request type `%s`....", url, request_type)
@@ -146,7 +146,7 @@ def sendIndexRequest(urls):
 
 def main_engine():
     logger.info('Starting...')
-    get_from_sitemap(sitemap)
+    get_from_sitemap(sitemap_url)
     get_from_csv(csv_path)
     filter_and_send()
     logger.info("The END...")
